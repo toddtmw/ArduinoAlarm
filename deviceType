@@ -1,0 +1,264 @@
+/**
+ *  ST_AnyThing.groovy
+ *
+ *  Copyright 2014 Dan G Ogorchock & Daniel J Ogorchock
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ *  Change History:
+ *
+ *    Date        Who            What
+ *    ----        ---            ----
+ *    2015-01-03  Dan & Daniel   Original Creation
+ *    2015-01-10  Todd Whitehead Just a Bunch of Contacts
+ *
+ */
+ 
+metadata {
+	definition (name: "alarm", namespace: "toddtmw", author: "Daniel Ogorchock") {
+		capability "Configuration"
+        capability "Refresh"
+		capability "Water Sensor"
+		capability "Temperature Measurement"
+		capability "Relative Humidity Measurement"
+		capability "Contact Sensor"
+		capability "Polling"
+		capability "Sensor"
+
+		attribute "Pin16t", "string"
+		attribute "Pin17t", "string"
+		attribute "Pin18t", "string"
+		attribute "Pin19t", "string"
+		attribute "Pin53t", "string"
+		attribute "Pin16h", "string"
+		attribute "Pin17h", "string"
+		attribute "Pin18h", "string"
+		attribute "Pin19h", "string"
+		attribute "Pin53h", "string"
+		attribute "water", "string"
+		attribute "Pin4", "string"
+    	attribute "Pin5", "string"
+      	attribute "Pin7", "string"
+      	attribute "Pin8", "string"
+      	attribute "Pin9", "string"
+      	attribute "Pin10", "string"
+      	attribute "Pin11", "string"
+      	attribute "Pin12", "string"
+
+
+
+	}
+
+    simulator {
+ 
+    }
+    // Preferences
+	preferences {
+    	input "temphumidSampleRate", "number", title: "Temperature/Humidity Sensor Sampling Interval (seconds)", description: "Sampling Interval (seconds)", defaultValue: 30, required: true, displayDuringSetup: true
+    	input "waterSampleRate", "number", title: "Water Sensor Sampling Interval (seconds)", description: "Sampling Interval (seconds)", defaultValue: 30, required: true, displayDuringSetup: true
+	}
+
+
+
+	// Tile Definitions
+	tiles {
+        valueTile("Pin16t", "device.Pin16t", width: 1, height: 1) {
+			state("temperature", label:'${currentValue}∞', 
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				]
+			)
+		}
+        
+
+        valueTile("Pin17t", "device.Pin17t", width: 1, height: 1) {
+			state("temperature", label:'${currentValue}∞', 
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				]
+			)
+		}
+        
+
+        valueTile("Pin18t", "device.Pin18t", width: 1, height: 1) {
+			state("temperature", label:'${currentValue}∞', 
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				]
+			)
+		}
+        
+
+        valueTile("Pin19t", "device.Pin19t", width: 1, height: 1) {
+			state("temperature", label:'${currentValue}∞', 
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				]
+			)
+		}
+        
+
+        valueTile("Pin53t", "device.Pin53t", width: 1, height: 1) {
+			state("temperature", label:'${currentValue}∞', 
+				backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				]
+			)
+		}
+        
+
+
+        valueTile("Pin16h", "device.Pin16h", inactiveLabel: false) {
+			state "humidity", label:'${currentValue}% humidity', unit:""
+		}
+
+
+        valueTile("Pin17h", "device.Pin17h", inactiveLabel: false) {
+			state "humidity", label:'${currentValue}% humidity', unit:""
+		}
+
+
+        valueTile("Pin18h", "device.Pin18h", inactiveLabel: false) {
+			state "humidity", label:'${currentValue}% humidity', unit:""
+		}
+
+        valueTile("Pin19h", "device.Pin19h", inactiveLabel: false) {
+			state "humidity", label:'${currentValue}% humidity', unit:""
+		}
+
+        valueTile("Pin53h", "device.Pin53h", inactiveLabel: false) {
+			state "humidity", label:'${currentValue}% humidity', unit:""
+		}
+
+
+
+
+        standardTile("water", "device.water", width: 1, height: 1) {
+			state("dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff")
+			state("wet", icon:"st.alarm.water.wet", backgroundColor:"#53a7c0")
+		}
+
+		standardTile("Pin4", "device.Pin4", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+		standardTile("Pin5", "device.Pin5", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+		standardTile("Pin7", "device.Pin7", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+		standardTile("Pin8", "device.Pin8", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+		standardTile("Pin9", "device.Pin9", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+		standardTile("Pin10", "device.Pin10", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+		standardTile("Pin11", "device.Pin11", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+		standardTile("Pin12", "device.Pin12", width: 1, height: 1) {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+
+
+
+        main(["Pin16t","Pin17t","Pin18t","Pin19t","Pin53t","Pin16h","Pin17h","Pin18h","Pin19h","Pin53h","water","Pin4","Pin5","Pin7","Pin8","Pin9","Pin10","Pin11","Pin12"])
+
+//        main(["PinA8"])
+
+        details(["Pin16t","Pin17t","Pin18t","Pin19t","Pin53t","Pin16h","Pin17h","Pin18h","Pin19h","Pin53h","water","Pin4","Pin5","Pin7","Pin8","Pin9","Pin10","Pin11","Pin12"])
+	}
+}
+
+// parse events into attributes
+def parse(String description) {
+	log.debug "Parsing '${description}'"
+    def msg = zigbee.parse(description)?.text
+    log.debug "Parse got '${msg}'"
+
+    def parts = msg.split(" ")
+    def name  = parts.length>0?parts[0].trim():null
+    def value = parts.length>1?parts[1].trim():null
+
+    name = value != "ping" ? name : null
+
+    def result = createEvent(name: name, value: value)
+
+    log.debug result
+
+    return result
+}
+
+
+def poll() {
+	//temporarily implement poll() to issue a configure() command to send the polling interval settings to the arduino
+	configure()
+}
+
+
+def configure() {
+	log.debug "Executing 'configure'"
+    //log.debug "illuminance " + illuminanceSampleRate + "|temphumid " + temphumidSampleRate + "|water " + waterSampleRate
+    log.debug "water " + waterSampleRate
+	log.debug "temphumid " + temphumidSampleRate
+	[
+		zigbee.smartShield(text: "water " + waterSampleRate).format(),
+        "delay 1000",
+        zigbee.smartShield(text: "temphumid " + temphumidSampleRate).format()
+    ]
+}
