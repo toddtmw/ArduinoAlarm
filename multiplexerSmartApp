@@ -1,0 +1,191 @@
+/**
+ *  Virtual to Arduino Multiplexer
+ *
+ *  Copyright 2014 Daniel Ogorchock
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+definition(
+    name: "alarm",
+    namespace: "toddtmw",
+    author: "Daniel Ogorchock",
+    description: "Virtual to Arduino Multiplexer",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+ 
+ 
+preferences {
+section("Connect these virtual contact sensor to the Arduino's sensors") {
+		input "pin4", title: "Virtual Contact for Pin 4", "capability.contactSensor", required: false
+        input "pin5", title: "Virtual Contact for Pin 5", "capability.contactSensor", required: false
+        input "pin7", title: "Virtual Contact for Pin 7", "capability.contactSensor", required: false
+        input "pin8", title: "Virtual Contact for Pin 8", "capability.contactSensor", required: false
+        input "pin9", title: "Virtual Contact for Pin 9", "capability.contactSensor", required: false
+        input "pin10", title: "Virtual Contact for Pin 10", "capability.contactSensor", required: false
+        input "pin11", title: "Virtual Contact for Pin 11", "capability.contactSensor", required: false
+        input "pin12", title: "Virtual Contact for Pin 12", "capability.contactSensor", required: false
+
+
+	}
+
+section("Which Arduino board to control?") {
+		input "arduino", "capability.contactSensor"
+        //"device.ogiewonarduino" 
+    }    
+}
+ 
+def installed() {
+	log.debug "Installed with settings: ${settings}"
+	subscribe()
+}
+ 
+def updated() {
+	log.debug "Updated with settings: ${settings}"
+	unsubscribe()
+	subscribe()
+}
+ 
+def subscribe() {
+ 
+    subscribe(arduino, "Pin4.open", pin4Open)
+    subscribe(arduino, "Pin4.closed", pin4Closed)
+
+    subscribe(arduino, "Pin5.open", pin5Open)
+    subscribe(arduino, "Pin5.closed", pin5Closed)
+
+    subscribe(arduino, "Pin7.open", pin7Open)
+    subscribe(arduino, "Pin7.closed", pin7Closed)
+
+    subscribe(arduino, "Pin8.open", pin8Open)
+    subscribe(arduino, "Pin8.closed", pin8Closed)
+
+    subscribe(arduino, "Pin9.open", pin9Open)
+    subscribe(arduino, "Pin9.closed", pin9Closed)
+
+    subscribe(arduino, "Pin10.open", pin10Open)
+    subscribe(arduino, "Pin10.closed", pin10Closed)
+
+    subscribe(arduino, "Pin11.open", pin11Open)
+    subscribe(arduino, "Pin11.closed", pin11Closed)
+
+    subscribe(arduino, "Pin12.open", pin12Open)
+    subscribe(arduino, "Pin12.closed", pin12Closed)
+}
+ 
+ 
+ 
+def pin4Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin4.openme()
+}
+ 
+def pin4Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin4.closeme()
+}
+ 
+
+def pin5Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin5.openme()
+}
+ 
+def pin5Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin5.closeme()
+}
+ 
+
+def pin7Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin7.openme()
+}
+ 
+def pin7Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin7.closeme()
+}
+ 
+
+def pin8Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin8.openme()
+}
+ 
+def pin8Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin8.closeme()
+}
+ 
+
+def pin9Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin9.openme()
+}
+ 
+def pin9Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin9.closeme()
+}
+ 
+
+def pin10Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin10.openme()
+}
+ 
+def pin10Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin10.closeme()
+}
+ 
+
+def pin11Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin11.openme()
+}
+ 
+def pin11Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin11.closeme()
+}
+ 
+
+def pin12Open(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin12.openme()
+}
+ 
+def pin12Closed(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    pin12.closeme()
+} 
+
+def initialize() {
+	// TODO: subscribe to attributes, devices, locations, etc.
+}
