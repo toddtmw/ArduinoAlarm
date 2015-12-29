@@ -1,0 +1,145 @@
+//******************************************************************************************
+//  File: myAlarm.ino
+//  Authors: Todd Whitehead, based on code by Dan G Ogorchock & Daniel J Ogorchock (Father and Son)
+//  Version 9.0
+//  Description: This code incorporates contact, temperature, humidity and water sensors in one
+//               This is an expansion of the contact-only code also in this GitHub repository
+//******************************************************************************************
+
+//******************************************************************************************
+// SmartThings Library for Arduino Shield
+//******************************************************************************************
+#include <SoftwareSerial.h> //Arduino UNO/Leonardo uses SoftwareSerial for the SmartThings Library
+#include <SmartThings.h>    //Library to provide API to the SmartThings Shield
+#include <avr/pgmspace.h>
+
+//******************************************************************************************
+// ST_Anything Library 
+//******************************************************************************************
+#include <Constants.h>       //Constants.h is designed to be modified by the end user to adjust behavior of the ST_Anything library
+#include <Device.h>          //Generic Device Class, inherited by Sensor and Executor classes
+#include <Sensor.h>          //Generic Sensor Class, typically provides data to ST Cloud (e.g. Temperature, Motion, etc...)
+#include <InterruptSensor.h> //Generic Interrupt "Sensor" Class, waits for change of state on digital input 
+#include <PollingSensor.h>   //Generic Polling "Sensor" Class, polls Arduino pins periodically
+#include <Everything.h>      //Master Brain of ST_Anything library that ties everything together and performs ST Shield communications
+
+
+#include <PS_Water.h>        //Implements a Polling Sensor (PS) to measure presence of water (i.e. leak detector)
+#include <IS_Contact.h>      //Implements an Interrupt Sensor (IS) to monitor the status of a digital input pin
+#include <EX_Alarm.h>        //Implements Executor (EX)as an Alarm Siren capability via a digital output to a relay
+
+//******************************************************************************************
+//Define which Arduino Pins will be used for each device
+//  Notes: -Serial Communications Pins are defined in Constants.h (avoid pins 0,1,2,3
+//          for inputs and output devices below as they may be used for communications)
+//         -Always avoid Pin 6 as it is reserved by the SmartThings Shield
+//
+//******************************************************************************************
+//"RESERVED" pins for SmartThings ThingShield - best to avoid
+#define PIN_O_RESERVED               0  //reserved by ThingShield for Serial communications OR USB Serial Monitor
+#define PIN_1_RESERVED               1  //reserved by ThingShield for Serial communications OR USB Serial Monitor
+#define PIN_2_RESERVED               2  //reserved by ThingShield for Serial communications
+#define PIN_3_RESERVED               3  //reserved by ThingShield for Serial communications
+#define PIN_6_RESERVED               6  //reserved by ThingShield (possible future use?)
+
+#define PIN_CONTACT4             4
+#define PIN_CONTACT5             5
+#define PIN_CONTACT7             7
+#define PIN_CONTACT8             8
+#define PIN_CONTACT9             9
+#define PIN_CONTACT10            10
+#define PIN_CONTACT11            11
+#define PIN_CONTACT12            12
+#define PIN_WATER                A8
+#define PIN_WATER1               A1
+#define PIN_WATER2               A2
+#define PIN_WATER3               A3
+#define PIN_WATER4               A4
+#define PIN_WATER5               A5
+
+
+
+//******************************************************************************************
+//Declare each Device that is attached to the Arduino
+//  Notes: - For each device, there is typically a corresponding "tile" defined in your 
+//           SmartThings DeviceType Groovy code
+//         - For details on each device's constructor arguments below, please refer to the 
+//           corresponding header (.h) and program (.cpp) files.
+//         - The name assigned to each device (1st argument below) must match the Groovy
+//           DeviceType Tile name.  (Note: "temphumid" below is the exception to this rule
+//           as the DHT sensors produce both "temperature" and "humidity".  Data from that
+//           particular sensor is sent to the ST Shield in two separate updates, one for 
+//           "temperature" and one for "humidity")
+//******************************************************************************************
+
+
+//******************************************************************************************
+//Arduino Setup() routine
+//******************************************************************************************
+void setup()
+{
+  //Interrupt Sensors 
+  //st::IS_Motion sensor4("motion", PIN_MOTION, HIGH, false);
+  static st::IS_Contact sensor4(F("Pin4"), PIN_CONTACT4, LOW, true, 20000);
+  static st::IS_Contact sensor5(F("Pin5"), PIN_CONTACT5, LOW, true, 20000);
+  static st::IS_Contact sensor7(F("Pin7"), PIN_CONTACT7, LOW, true);
+  static st::IS_Contact sensor8(F("Pin8"), PIN_CONTACT8, LOW, true);
+  static st::IS_Contact sensor9(F("Pin9"), PIN_CONTACT9, LOW, true);
+  static st::IS_Contact sensor10(F("Pin10"), PIN_CONTACT10, LOW, true);
+  static st::IS_Contact sensor11(F("Pin11"), PIN_CONTACT11, LOW, true);
+  static st::IS_Contact sensor12(F("Pin12"), PIN_CONTACT12, LOW, true);
+
+  //Polling Sensors
+  static st::PS_Water sensorA1(F("PinA1"), 60, 20, PIN_WATER1);
+  static st::PS_Water sensorA2(F("PinA2"), 60, 20, PIN_WATER2);
+  static st::PS_Water sensorA3(F("PinA3"), 60, 20, PIN_WATER3);
+  static st::PS_Water sensorA4(F("PinA4"), 60, 20, PIN_WATER4);
+  static st::PS_Water sensorA5(F("PinA5"), 60, 20, PIN_WATER5);
+  //  Configure debug print output from each main class 
+  //  -Note: Set these to "false" if using Hardware Serial on pins 0 & 1
+  //         to prevent communication conflicts with the ST Shield communications
+  //*****************************************************************************
+  st::Everything::debug=true;
+  st::Executor::debug=true;
+  st::Device::debug=true;
+  st::PollingSensor::debug=true;
+  st::InterruptSensor::debug=true;
+  
+  //*****************************************************************************
+  //Initialize the "Everything" Class
+  //*****************************************************************************
+  st::Everything::init();
+  
+  //*****************************************************************************
+  //Add each sensor to the "Everything" Class
+  //*****************************************************************************
+  st::Everything::addSensor(&sensor4);
+  st::Everything::addSensor(&sensor5);
+  st::Everything::addSensor(&sensor7);
+  st::Everything::addSensor(&sensor8); 
+  st::Everything::addSensor(&sensor9); 
+  st::Everything::addSensor(&sensor10); 
+  st::Everything::addSensor(&sensor11); 
+  st::Everything::addSensor(&sensor12); 
+  st::Everything::addSensor(&sensorA1); 
+  st::Everything::addSensor(&sensorA2); 
+  st::Everything::addSensor(&sensorA3); 
+  st::Everything::addSensor(&sensorA4); 
+  st::Everything::addSensor(&sensorA5); 
+    
+  //*****************************************************************************
+  //Initialize each of the devices which were added to the Everything Class
+  st::Everything::initDevices();
+  //*****************************************************************************
+}
+
+//******************************************************************************************
+//Arduino Loop() routine
+//******************************************************************************************
+void loop()
+{
+  //*****************************************************************************
+  //Execute the Everything run method which takes care of "Everything"
+  //*****************************************************************************
+  st::Everything::run();
+}
