@@ -1,282 +1,166 @@
-/**
- *  ST_AnyThing.groovy
- *
- *  Copyright 2015 Todd Whitehead, based on code by Dan G Ogorchock & Daniel J Ogorchock
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *  for the specific language governing permissions and limitations under the License.
- *
- */
- 
-metadata {
-	definition (name: "bigAlarm", namespace: "toddtmw", author: "Todd Whitehead") {
-		capability "Configuration"
-        capability "Refresh"
-		capability "Water Sensor"
-		capability "Temperature Measurement"
-		capability "Relative Humidity Measurement"
-		capability "Contact Sensor"
-		capability "Polling"
-		capability "Sensor"
+//******************************************************************************************
+//  File: myAlarm.ino
+//  Authors: Todd Whitehead, based on code by Dan G Ogorchock & Daniel J Ogorchock (Father and Son)
+//  Version 8.0
+//  Description: This code incorporates contact, temperature, humidity and water sensors in one
+//               This is an expansion of the contact-only code also in this GitHub repository
+//******************************************************************************************
 
-		attribute "Pin16t", "string"
-		attribute "Pin17t", "string"
-		attribute "Pin18t", "string"
-		attribute "Pin19t", "string"
-		attribute "Pin53t", "string"
-		attribute "Pin16h", "string"
-		attribute "Pin17h", "string"
-		attribute "Pin18h", "string"
-		attribute "Pin19h", "string"
-		attribute "Pin53h", "string"
-		attribute "PinA1", "string"
-		attribute "PinA2", "string"
-		attribute "PinA3", "string"
-		attribute "PinA4", "string"
-		attribute "PinA5", "string"
-		attribute "Pin4", "string"
-    	attribute "Pin5", "string"
-      	attribute "Pin7", "string"
-      	attribute "Pin8", "string"
-      	attribute "Pin9", "string"
-      	attribute "Pin10", "string"
-      	attribute "Pin11", "string"
-      	attribute "Pin12", "string"
+//******************************************************************************************
+// SmartThings Library for Arduino Shield
+//******************************************************************************************
+#include <SoftwareSerial.h> //Arduino UNO/Leonardo uses SoftwareSerial for the SmartThings Library
+#include <SmartThings.h>    //Library to provide API to the SmartThings Shield
+#include <dht.h>            //DHT Temperature and Humidity Library 
+#include <avr/pgmspace.h>
+
+//******************************************************************************************
+// ST_Anything Library 
+//******************************************************************************************
+#include <Constants.h>       //Constants.h is designed to be modified by the end user to adjust behavior of the ST_Anything library
+#include <Device.h>          //Generic Device Class, inherited by Sensor and Executor classes
+#include <Sensor.h>          //Generic Sensor Class, typically provides data to ST Cloud (e.g. Temperature, Motion, etc...)
+#include <InterruptSensor.h> //Generic Interrupt "Sensor" Class, waits for change of state on digital input 
+#include <PollingSensor.h>   //Generic Polling "Sensor" Class, polls Arduino pins periodically
+#include <Everything.h>      //Master Brain of ST_Anything library that ties everything together and performs ST Shield communications
 
 
+#include <PS_Illuminance.h>  //Implements a Polling Sensor (PS) to measure light levels via a photo resistor
 
-	}
+#include <PS_TemperatureHumidity.h>  //Implements a Polling Sensor (PS) to measure Temperature and Humidity via DHT library
+#include <PS_Water.h>        //Implements a Polling Sensor (PS) to measure presence of water (i.e. leak detector)
+#include <IS_Motion.h>       //Implements an Interrupt Sensor (IS) to detect motion via a PIR sensor
+#include <IS_Contact.h>      //Implements an Interrupt Sensor (IS) to monitor the status of a digital input pin
+#include <EX_Switch.h>       //Implements an Executor (EX) via a digital output to a relay
+#include <EX_Alarm.h>        //Implements Executor (EX)as an Alarm Siren capability via a digital output to a relay
 
-    simulator {
- 
-    }
-    // Preferences
-	preferences {
-    	input "temphumidSampleRate", "number", title: "Temperature/Humidity Sensor Sampling Interval (seconds)", description: "Sampling Interval (seconds)", defaultValue: 30, required: true, displayDuringSetup: true
-    	input "waterSampleRate", "number", title: "Water Sensor Sampling Interval (seconds)", description: "Sampling Interval (seconds)", defaultValue: 30, required: true, displayDuringSetup: true
-	}
+//******************************************************************************************
+//Define which Arduino Pins will be used for each device
+//  Notes: -Serial Communications Pins are defined in Constants.h (avoid pins 0,1,2,3
+//          for inputs and output devices below as they may be used for communications)
+//         -Always avoid Pin 6 as it is reserved by the SmartThings Shield
+//
+//******************************************************************************************
+//"RESERVED" pins for SmartThings ThingShield - best to avoid
+#define PIN_O_RESERVED               0  //reserved by ThingShield for Serial communications OR USB Serial Monitor
+#define PIN_1_RESERVED               1  //reserved by ThingShield for Serial communications OR USB Serial Monitor
+#define PIN_2_RESERVED               2  //reserved by ThingShield for Serial communications
+#define PIN_3_RESERVED               3  //reserved by ThingShield for Serial communications
+#define PIN_6_RESERVED               6  //reserved by ThingShield (possible future use?)
 
-
-
-	// Tile Definitions
-	tiles {
-        valueTile("Pin16t", "device.Pin16t", width: 1, height: 1) {
-			state("temperature", label:'${currentValue}∞', 
-				backgroundColors:[
-					[value: 31, color: "#153591"],
-					[value: 44, color: "#1e9cbb"],
-					[value: 59, color: "#90d2a7"],
-					[value: 74, color: "#44b621"],
-					[value: 84, color: "#f1d801"],
-					[value: 95, color: "#d04e00"],
-					[value: 96, color: "#bc2323"]
-				]
-			)
-		}
-        
-
-        valueTile("Pin17t", "device.Pin17t", width: 1, height: 1) {
-			state("temperature", label:'${currentValue}∞', 
-				backgroundColors:[
-					[value: 31, color: "#153591"],
-					[value: 44, color: "#1e9cbb"],
-					[value: 59, color: "#90d2a7"],
-					[value: 74, color: "#44b621"],
-					[value: 84, color: "#f1d801"],
-					[value: 95, color: "#d04e00"],
-					[value: 96, color: "#bc2323"]
-				]
-			)
-		}
-        
-
-        valueTile("Pin18t", "device.Pin18t", width: 1, height: 1) {
-			state("temperature", label:'${currentValue}∞', 
-				backgroundColors:[
-					[value: 31, color: "#153591"],
-					[value: 44, color: "#1e9cbb"],
-					[value: 59, color: "#90d2a7"],
-					[value: 74, color: "#44b621"],
-					[value: 84, color: "#f1d801"],
-					[value: 95, color: "#d04e00"],
-					[value: 96, color: "#bc2323"]
-				]
-			)
-		}
-        
-
-        valueTile("Pin19t", "device.Pin19t", width: 1, height: 1) {
-			state("temperature", label:'${currentValue}∞', 
-				backgroundColors:[
-					[value: 31, color: "#153591"],
-					[value: 44, color: "#1e9cbb"],
-					[value: 59, color: "#90d2a7"],
-					[value: 74, color: "#44b621"],
-					[value: 84, color: "#f1d801"],
-					[value: 95, color: "#d04e00"],
-					[value: 96, color: "#bc2323"]
-				]
-			)
-		}
-        
-
-        valueTile("Pin53t", "device.Pin53t", width: 1, height: 1) {
-			state("temperature", label:'${currentValue}∞', 
-				backgroundColors:[
-					[value: 31, color: "#153591"],
-					[value: 44, color: "#1e9cbb"],
-					[value: 59, color: "#90d2a7"],
-					[value: 74, color: "#44b621"],
-					[value: 84, color: "#f1d801"],
-					[value: 95, color: "#d04e00"],
-					[value: 96, color: "#bc2323"]
-				]
-			)
-		}
-        
-
-
-        valueTile("Pin16h", "device.Pin16h", inactiveLabel: false) {
-			state "humidity", label:'${currentValue}% humidity', unit:""
-		}
-
-
-        valueTile("Pin17h", "device.Pin17h", inactiveLabel: false) {
-			state "humidity", label:'${currentValue}% humidity', unit:""
-		}
-
-
-        valueTile("Pin18h", "device.Pin18h", inactiveLabel: false) {
-			state "humidity", label:'${currentValue}% humidity', unit:""
-		}
-
-        valueTile("Pin19h", "device.Pin19h", inactiveLabel: false) {
-			state "humidity", label:'${currentValue}% humidity', unit:""
-		}
-
-        valueTile("Pin53h", "device.Pin53h", inactiveLabel: false) {
-			state "humidity", label:'${currentValue}% humidity', unit:""
-		}
+#define PIN_CONTACT4             4
+#define PIN_CONTACT5             5
+#define PIN_CONTACT7             7
+#define PIN_CONTACT8             8
+#define PIN_CONTACT9             9
+#define PIN_CONTACT10            10
+#define PIN_CONTACT11            11
+#define PIN_CONTACT12            12
+#define PIN_WATER                A8
+#define PIN_TEMPERATUREHUMIDITY1 16
+#define PIN_TEMPERATUREHUMIDITY2 17
+#define PIN_TEMPERATUREHUMIDITY3 18
+#define PIN_TEMPERATUREHUMIDITY4 19
+#define PIN_TEMPERATUREHUMIDITY5 53
+#define PIN_WATER1               A1
+#define PIN_WATER2               A2
+#define PIN_WATER3               A3
+#define PIN_WATER4               A4
+#define PIN_WATER5               A5
 
 
 
-
-        standardTile("PinA1", "device.PinA1", width: 1, height: 1) {
-			state("dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff")
-			state("wet", icon:"st.alarm.water.wet", backgroundColor:"#53a7c0")
-		}
-
-        standardTile("PinA2", "device.PinA2", width: 1, height: 1) {
-			state("dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff")
-			state("wet", icon:"st.alarm.water.wet", backgroundColor:"#53a7c0")
-		}
-
-        standardTile("PinA3", "device.PinA3", width: 1, height: 1) {
-			state("dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff")
-			state("wet", icon:"st.alarm.water.wet", backgroundColor:"#53a7c0")
-		}
-
-        standardTile("PinA4", "device.PinA4", width: 1, height: 1) {
-			state("dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff")
-			state("wet", icon:"st.alarm.water.wet", backgroundColor:"#53a7c0")
-		}
-
-        standardTile("PinA5", "device.PinA5", width: 1, height: 1) {
-			state("dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff")
-			state("wet", icon:"st.alarm.water.wet", backgroundColor:"#53a7c0")
-		}
+//******************************************************************************************
+//Declare each Device that is attached to the Arduino
+//  Notes: - For each device, there is typically a corresponding "tile" defined in your 
+//           SmartThings DeviceType Groovy code
+//         - For details on each device's constructor arguments below, please refer to the 
+//           corresponding header (.h) and program (.cpp) files.
+//         - The name assigned to each device (1st argument below) must match the Groovy
+//           DeviceType Tile name.  (Note: "temphumid" below is the exception to this rule
+//           as the DHT sensors produce both "temperature" and "humidity".  Data from that
+//           particular sensor is sent to the ST Shield in two separate updates, one for 
+//           "temperature" and one for "humidity")
+//******************************************************************************************
 
 
-		standardTile("Pin4", "device.Pin4", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
+//******************************************************************************************
+//Arduino Setup() routine
+//******************************************************************************************
+void setup()
+{
+  //Interrupt Sensors 
+  //st::IS_Motion sensor4("motion", PIN_MOTION, HIGH, false);
+  static st::IS_Contact sensor4(F("Pin4"), PIN_CONTACT4, LOW, true, 20000);
+  static st::IS_Contact sensor5(F("Pin5"), PIN_CONTACT5, LOW, true, 20000);
+  static st::IS_Contact sensor7(F("Pin7"), PIN_CONTACT7, LOW, true);
+  static st::IS_Contact sensor8(F("Pin8"), PIN_CONTACT8, LOW, true);
+  static st::IS_Contact sensor9(F("Pin9"), PIN_CONTACT9, LOW, true);
+  static st::IS_Contact sensor10(F("Pin10"), PIN_CONTACT10, LOW, true);
+  static st::IS_Contact sensor11(F("Pin11"), PIN_CONTACT11, LOW, true);
+  static st::IS_Contact sensor12(F("Pin12"), PIN_CONTACT12, LOW, true);
 
-		standardTile("Pin5", "device.Pin5", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
-
-		standardTile("Pin7", "device.Pin7", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
-
-		standardTile("Pin8", "device.Pin8", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
-
-		standardTile("Pin9", "device.Pin9", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
-
-		standardTile("Pin10", "device.Pin10", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
-
-		standardTile("Pin11", "device.Pin11", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
-
-		standardTile("Pin12", "device.Pin12", width: 1, height: 1) {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
-		}
-
-
-
-        main(["Pin16t","Pin16h","PinA1","Pin17t","Pin17h","PinA2","Pin18t","Pin18h","PinA3","Pin19t","Pin19h","PinA4","Pin53t","Pin53h","Pin4","Pin5","Pin7","Pin8","Pin9","Pin10","Pin11","Pin12"])
-
-//        main(["PinA8"])
-
-        details(["Pin16t","Pin16h","PinA1","Pin17t","Pin17h","PinA2","Pin18t","Pin18h","PinA3","Pin19t","Pin19h","PinA4","Pin53t","Pin53h","PinA5","Pin4","Pin5","Pin7","Pin8","Pin9","Pin10","Pin11","Pin12"])
-	}
+  //Polling Sensors
+  static st::PS_TemperatureHumidity sensor16(F("Pin16"), 120, 10, PIN_TEMPERATUREHUMIDITY1, st::PS_TemperatureHumidity::DHT11, "Pin16t", "Pin16h");
+  static st::PS_TemperatureHumidity sensor17(F("Pin17"), 120, 10, PIN_TEMPERATUREHUMIDITY2, st::PS_TemperatureHumidity::DHT11, "Pin17t", "Pin17h");
+  static st::PS_TemperatureHumidity sensor18(F("Pin18"), 120, 10, PIN_TEMPERATUREHUMIDITY3, st::PS_TemperatureHumidity::DHT11, "Pin18t", "Pin18h");
+  static st::PS_TemperatureHumidity sensor19(F("Pin19"), 120, 10, PIN_TEMPERATUREHUMIDITY4, st::PS_TemperatureHumidity::DHT11, "Pin19t", "Pin19h");
+  static st::PS_TemperatureHumidity sensor20(F("Pin53"), 120, 10, PIN_TEMPERATUREHUMIDITY5, st::PS_TemperatureHumidity::DHT11, "Pin53t", "Pin53h");
+  static st::PS_Water sensorA1(F("PinA1"), 60, 20, PIN_WATER1);
+  static st::PS_Water sensorA2(F("PinA2"), 60, 20, PIN_WATER2);
+  static st::PS_Water sensorA3(F("PinA3"), 60, 20, PIN_WATER3);
+  static st::PS_Water sensorA4(F("PinA4"), 60, 20, PIN_WATER4);
+  static st::PS_Water sensorA5(F("PinA5"), 60, 20, PIN_WATER5);
+  //  Configure debug print output from each main class 
+  //  -Note: Set these to "false" if using Hardware Serial on pins 0 & 1
+  //         to prevent communication conflicts with the ST Shield communications
+  //*****************************************************************************
+  st::Everything::debug=true;
+  st::Executor::debug=true;
+  st::Device::debug=true;
+  st::PollingSensor::debug=true;
+  st::InterruptSensor::debug=true;
+  
+  //*****************************************************************************
+  //Initialize the "Everything" Class
+  //*****************************************************************************
+  st::Everything::init();
+  
+  //*****************************************************************************
+  //Add each sensor to the "Everything" Class
+  //*****************************************************************************
+  st::Everything::addSensor(&sensor4);
+  st::Everything::addSensor(&sensor5);
+  st::Everything::addSensor(&sensor7);
+  st::Everything::addSensor(&sensor8); 
+  st::Everything::addSensor(&sensor9); 
+  st::Everything::addSensor(&sensor10); 
+  st::Everything::addSensor(&sensor11); 
+  st::Everything::addSensor(&sensor12); 
+  st::Everything::addSensor(&sensor16); 
+  st::Everything::addSensor(&sensor17); 
+  st::Everything::addSensor(&sensor18); 
+  st::Everything::addSensor(&sensor19); 
+  st::Everything::addSensor(&sensor20); 
+  st::Everything::addSensor(&sensorA1); 
+  st::Everything::addSensor(&sensorA2); 
+  st::Everything::addSensor(&sensorA3); 
+  st::Everything::addSensor(&sensorA4); 
+  st::Everything::addSensor(&sensorA5); 
+    
+  //*****************************************************************************
+  //Initialize each of the devices which were added to the Everything Class
+  st::Everything::initDevices();
+  //*****************************************************************************
 }
 
-// parse events into attributes
-def parse(String description) {
-	log.debug "Parsing '${description}'"
-    def msg = zigbee.parse(description)?.text
-    log.debug "Parse got '${msg}'"
-
-    def parts = msg.split(" ")
-    def name  = parts.length>0?parts[0].trim():null
-    def value = parts.length>1?parts[1].trim():null
-
-    name = value != "ping" ? name : null
-
-    def result = createEvent(name: name, value: value)
-
-    log.debug result
-
-    return result
-}
-
-
-def poll() {
-	//temporarily implement poll() to issue a configure() command to send the polling interval settings to the arduino
-	configure()
-}
-
-
-def configure() {
-	log.debug "Executing 'configure'"
-    //log.debug "illuminance " + illuminanceSampleRate + "|temphumid " + temphumidSampleRate + "|water " + waterSampleRate
-    log.debug "water " + waterSampleRate
-	log.debug "temphumid " + temphumidSampleRate
-	[
-		zigbee.smartShield(text: "water " + waterSampleRate).format(),
-        "delay 1000",
-        zigbee.smartShield(text: "temphumid " + temphumidSampleRate).format()
-    ]
+//******************************************************************************************
+//Arduino Loop() routine
+//******************************************************************************************
+void loop()
+{
+  //*****************************************************************************
+  //Execute the Everything run method which takes care of "Everything"
+  //*****************************************************************************
+  st::Everything::run();
 }
