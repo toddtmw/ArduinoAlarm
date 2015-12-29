@@ -1,0 +1,129 @@
+/**
+ *  Virtual to Arduino Multiplexer
+ *
+ *  Copyright 2014 Daniel Ogorchock
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+definition(
+    name: "water mux",
+    namespace: "toddtmw",
+    author: "Daniel Ogorchock",
+    description: "Virtual to Arduino Multiplexer",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+ 
+ 
+preferences {
+	section("Select the Virtual Water devices") {
+		input "water_1", title: "Virtual Sensor for Pin A1", "capability.waterSensor", required: false
+		input "water_2", title: "Virtual Sensor for Pin A2", "capability.waterSensor", required: false
+		input "water_3", title: "Virtual Sensor for Pin A3", "capability.waterSensor", required: false
+		input "water_4", title: "Virtual Sensor for Pin A4", "capability.waterSensor", required: false
+		input "water_5", title: "Virtual Sensor for Pin A5", "capability.waterSensor", required: false
+	}
+
+ 
+    section("Which Arduino board to control?") {
+		input "arduino", "capability.contactSensor"
+    }    
+}
+ 
+def installed() {
+	log.debug "Installed with settings: ${settings}"
+	subscribe()
+}
+ 
+def updated() {
+	log.debug "Updated with settings: ${settings}"
+	unsubscribe()
+	subscribe()
+}
+ 
+def subscribe() {
+    subscribe(arduino, "PinA1.wet", water_1_wet)
+    subscribe(arduino, "PinA1.dry", water_1_dry)
+    subscribe(arduino, "PinA2.wet", water_2_wet)
+    subscribe(arduino, "PinA2.dry", water_2_dry)
+    subscribe(arduino, "PinA3.wet", water_3_wet)
+    subscribe(arduino, "PinA3.dry", water_3_dry)
+    subscribe(arduino, "PinA4.wet", water_4_wet)
+    subscribe(arduino, "PinA4.dry", water_4_dry)
+    subscribe(arduino, "PinA5.wet", water_5_wet)
+    subscribe(arduino, "PinA5.dry", water_5_dry)
+}
+  
+def water_1_wet(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_1.wetme()
+}
+ 
+def water_1_dry(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_1.dryme()
+} 
+
+
+def water_2_wet(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_2.wetme()
+}
+ 
+def water_2_dry(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_2.dryme()
+} 
+
+
+def water_3_wet(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_3.wetme()
+}
+ 
+def water_3_dry(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_3.dryme()
+} 
+
+def water_4_wet(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_4.wetme()
+}
+ 
+def water_4_dry(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_4.dryme()
+} 
+
+def water_5_wet(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_5.wetme()
+}
+ 
+def water_5_dry(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_5.dryme()
+} 
+
+def initialize() {
+	// TODO: subscribe to attributes, devices, locations, etc.
+}
