@@ -34,19 +34,15 @@ preferences {
 
 	section("Select the Virtual Water devices") {
 		input "water_1", title: "Virtual Sensor for Pin A1", "capability.waterSensor", required: false
-
 		input "water_2", title: "Virtual Sensor for Pin A2", "capability.waterSensor", required: false
-
 		input "water_3", title: "Virtual Sensor for Pin A3", "capability.waterSensor", required: false
-
 		input "water_4", title: "Virtual Sensor for Pin A4", "capability.waterSensor", required: false
-
+		input "water_5", title: "Virtual Sensor for Pin A5", "capability.waterSensor", required: false
 	}
 
  
     section("Which Arduino board to control?") {
 		input "arduino", "capability.contactSensor"
-        //"device.ogiewonarduino" 
     }    
 }
  
@@ -70,6 +66,8 @@ def subscribe() {
     subscribe(arduino, "PinA3.dry", water_3_dry)
     subscribe(arduino, "PinA4.wet", water_4_wet)
     subscribe(arduino, "PinA4.dry", water_4_dry)
+    subscribe(arduino, "PinA5.wet", water_5_wet)
+    subscribe(arduino, "PinA5.dry", water_5_dry)
 	subscribe(arduino, "Pin16t", temphumid_1_UpdateTemp)
    	subscribe(arduino, "Pin16h", temphumid_1_UpdateHumid)
 	subscribe(arduino, "Pin17t", temphumid_2_UpdateTemp)
@@ -120,7 +118,6 @@ def water_3_dry(evt)
     water_3.dryme()
 } 
 
-
 def water_4_wet(evt)
 {
     log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
@@ -131,6 +128,18 @@ def water_4_dry(evt)
 {
     log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
     water_4.dryme()
+} 
+
+def water_5_wet(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_5.wetme()
+}
+ 
+def water_5_dry(evt)
+{
+    log.debug "arduinoevent($evt.name: $evt.value: $evt.deviceId)"
+    water_5.dryme()
 } 
 
 
