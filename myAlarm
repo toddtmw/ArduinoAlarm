@@ -66,6 +66,7 @@
 #define PIN_WATER2               A2
 #define PIN_WATER3               A3
 #define PIN_WATER4               A4
+#define PIN_WATER5               A5
 
 
 
@@ -109,6 +110,7 @@ void setup()
   static st::PS_Water sensorA2(F("PinA2"), 60, 20, PIN_WATER2);
   static st::PS_Water sensorA3(F("PinA3"), 60, 20, PIN_WATER3);
   static st::PS_Water sensorA4(F("PinA4"), 60, 20, PIN_WATER4);
+  static st::PS_Water sensorA5(F("PinA5"), 60, 20, PIN_WATER5);
   //  Configure debug print output from each main class 
   //  -Note: Set these to "false" if using Hardware Serial on pins 0 & 1
   //         to prevent communication conflicts with the ST Shield communications
@@ -144,6 +146,7 @@ void setup()
   st::Everything::addSensor(&sensorA2); 
   st::Everything::addSensor(&sensorA3); 
   st::Everything::addSensor(&sensorA4); 
+  st::Everything::addSensor(&sensorA5); 
     
   //*****************************************************************************
   //Initialize each of the devices which were added to the Everything Class
